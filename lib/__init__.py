@@ -1,1 +1,1 @@
-from api import compute_nominal_resolution  # noqa
+from api import mean_resolution, nominal_resolution  # noqa

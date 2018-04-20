@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy, numpy.ma
 import cdms2
 import warnings
@@ -5,12 +6,12 @@ import warnings
 
 def degrees2radians(data, force=False):
     """Converts data from deg to radians"""
-    if data.max > 7. or force:
+    if data.max() > 7. or force:
         data = data / 180. * numpy.pi
     return data
 
 
-def mean_resolution(cellarea, longitude_bounds=None, latitude_bounds=None):
+def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None):
     if longitude_bounds is None and latitude_bounds is None:
         try:  # Ok maybe we can get this info from cellarea data
             mesh = cellarea.getGrid().getMesh()
@@ -33,21 +34,22 @@ def mean_resolution(cellarea, longitude_bounds=None, latitude_bounds=None):
     longitude_bounds = degrees2radians(longitude_bounds)
 
     # distance between successive corners
+    nverts = latitude_bounds.shape[-1]
     sh = list(latitude_bounds.shape[:-1])
-    del_lats = numpy.ma.zeros(sh)
-    del_lons = numpy.ma.zeros(sh)
-    max_distance = numpy.ma.zeros(sh)
+    del_lats = numpy.ma.zeros(sh,dtype=numpy.float)
+    del_lons = numpy.ma.zeros(sh, dtype=numpy.float)
+    max_distance = numpy.ma.zeros(sh, dtype=numpy.float)
 
-    for i in range(sh[-1]):
-        for j in range(i+1, sh[-1]):
+    for i in range(nverts-1):
+        for j in range(i+1, nverts):
             del_lats = latitude_bounds[:,i] - latitude_bounds[:,j] 
             del_lons = longitude_bounds[:,i] - longitude_bounds[:,j] 
             # formula from: https://en.wikipedia.org/wiki/Great-circle_distance
-            distance = 2.* numpy.ma.asin(numpy.ma.sqrt(numpy.ma.sin(del_lats/2.)**2 + numpy.ma.cos(numpy.ma.latitude_bounds[:,i])*numpy.ma.cos(latitude_bounds[:,j])*numpy.ma.sin(del_lons/2.)**2))
-            max_distance = numpy.ma.maximum(max_distance, distance)
+            distance = 2.* numpy.ma.arcsin(numpy.ma.sqrt(numpy.ma.sin(del_lats/2.)**2 + numpy.ma.cos(latitude_bounds[:,i])*numpy.ma.cos(latitude_bounds[:,j])*numpy.ma.sin(del_lons/2.)**2))
+            max_distance = numpy.ma.maximum(max_distance, distance.filled(0.0))
 
     radius = 6371.  # in km
-    accumlation = numpy.ma.sum(cellarea*max_distance) * radius / numpy.ma.sum(cellarea)
+    accumulation = numpy.ma.sum(cellarea*max_distance) * radius / numpy.ma.sum(cellarea)
     return accumulation
 
 def nominal_resolution(mean_resolution):
