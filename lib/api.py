@@ -1,18 +1,25 @@
 from __future__ import print_function
 import numpy, numpy.ma
-import cdms2
 import warnings
+
+try:
+    import cdms2
+    has_cdms = True
+except:
+    has_cdms = False
 
 
 def degrees2radians(data, force=False):
     """Converts data from deg to radians"""
-    if data.max() > 7. or force:
+    if data.max() > 20. or force:
         data = data / 180. * numpy.pi
+    else:
+        warnings.warn("It appears your data is already in radians, not touching it")
     return data
 
 
-def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None):
-    if longitude_bounds is None and latitude_bounds is None:
+def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, forceConversion=False, returnMaxDistance=False):
+    if longitude_bounds is None and latitude_bounds is None and has_cdms:
         try:  # Ok maybe we can get this info from cellarea data
             mesh = cellarea.getGrid().getMesh()
             latitude_bounds = mesh[:,0]
@@ -25,13 +32,8 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None):
         raise RuntimeError("You did not pass lat/lon bounds and couldn't infer them from cellarea")
 
 
-    # Save info for later
-    if isinstance(cellarea, cdms2.avariable.AbstractVariable):
-        orig_shape = cellarea.shape
-        orig_axes = cellarea.getAxisList()
-
-    latitude_bounds = degrees2radians(latitude_bounds)
-    longitude_bounds = degrees2radians(longitude_bounds)
+    latitude_bounds = degrees2radians(latitude_bounds, forceConversion)
+    longitude_bounds = degrees2radians(longitude_bounds, forceConversion)
 
     # distance between successive corners
     nverts = latitude_bounds.shape[-1]
@@ -42,15 +44,19 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None):
 
     for i in range(nverts-1):
         for j in range(i+1, nverts):
-            del_lats = latitude_bounds[:,i] - latitude_bounds[:,j] 
-            del_lons = longitude_bounds[:,i] - longitude_bounds[:,j] 
+            del_lats = numpy.ma.absolute(latitude_bounds[:,i] - latitude_bounds[:,j])
+            del_lons = numpy.ma.absolute(longitude_bounds[:,i] - longitude_bounds[:,j] )
+            del_lons = numpy.ma.where(numpy.ma.greater(del_lons,180.),numpy.ma.absolute(del_lons-360.), del_lons)
             # formula from: https://en.wikipedia.org/wiki/Great-circle_distance
             distance = 2.* numpy.ma.arcsin(numpy.ma.sqrt(numpy.ma.sin(del_lats/2.)**2 + numpy.ma.cos(latitude_bounds[:,i])*numpy.ma.cos(latitude_bounds[:,j])*numpy.ma.sin(del_lons/2.)**2))
             max_distance = numpy.ma.maximum(max_distance, distance.filled(0.0))
 
     radius = 6371.  # in km
     accumulation = numpy.ma.sum(cellarea*max_distance) * radius / numpy.ma.sum(cellarea)
-    return accumulation
+    if returnMaxDistance:
+        return accumulation, max_distance*radius
+    else:
+        return accumulation
 
 def nominal_resolution(mean_resolution):
 

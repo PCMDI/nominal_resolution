@@ -4,9 +4,7 @@ import numpy
 import nominal_resolution
 
 class KarlTest(unittest.TestCase):
-    def setUp(self):
-        nlon = 180
-        nlat = 90
+    def generateGrid(self, nlon, nlat):
         nmax = nlon*nlat
         nv = 5
 
@@ -35,28 +33,39 @@ class KarlTest(unittest.TestCase):
                 else:
                     cellarea[n] = radius**2 * (blons[n,0]-blons[n,3])*numpy.pi/180. * (numpy.sin(numpy.pi*blats[n,3]/180.) - numpy.sin(numpy.pi*blats[n,0]/180.))
 
-        print("BLATS:",blats[:10])
-        print("BLATS:",blats[-10:])
-        print("CELL:",cellarea[:5])
-        self.cellarea = cellarea
-        self.blats = blats
-        self.blons = blons
-        self.radius = radius
-        self.dlat = dlat
-        self.dlon = dlon
+        return cellarea, blats, blons, dlon, dlat
 
-    def testMe(self):
-        correct_resolution = self.radius*(self.dlat*numpy.pi/360.)/2. * (1. + ((self.dlat**2+self.dlon**2)/(self.dlat*self.dlon))*numpy.arctan(self.dlon/self.dlat))
+    def doit(self, nlon, nlat):
+        print("Testing:",nlon, nlat)
+        radius = 6371.
+        cellarea, blats, blons, dlon, dlat = self.generateGrid(nlon, nlat)
+        correct_resolution = radius*(dlat*numpy.pi/180.)/2. * (1. + ((dlat**2+dlon**2)/(dlat*dlon))*numpy.arctan(dlon/dlat))
 
-        print("COrrect: {:g}".format(correct_resolution))
+        print("Correct: {:g}".format(correct_resolution))
 
-        test_resolution = nominal_resolution.mean_resolution(self.cellarea, self.blats, self.blons)
+        test_resolution = nominal_resolution.mean_resolution(cellarea, blats, blons)
 
         print("Test resol: {:g}".format(test_resolution))
 
-        self.assertEqual(nominal_resolution.nominal_resolution(test_resolution),"500 km")
+        print("rtol:",(test_resolution-correct_resolution)/correct_resolution)
+        rtol = 0.001
+        if nlon<5:
+            rtol = .05
+        elif nlon<20:
+            rtol = .02
+        self.assertTrue(numpy.allclose(correct_resolution,test_resolution,rtol))
+        #self.assertEqual(nominal_resolution.nominal_resolution(test_resolution),"250 km")
 
 
+    def testMultipleResolutions(self):
+        self.doit(3,4)
+        self.doit(4,3)
+        self.doit(10,9)
+        self.doit(360,180)
+        self.doit(18,90)
+        self.doit(180,10)
+        self.doit(180,90)
+        self.doit(1800,900)
 
 
 
