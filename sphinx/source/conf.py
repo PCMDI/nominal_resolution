@@ -39,15 +39,15 @@ release = u'0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
+#    'sphinx.ext.autodoc',
+#    'sphinx.ext.doctest',
+#    'sphinx.ext.intersphinx',
+#    'sphinx.ext.todo',
+#    'sphinx.ext.coverage',
+#    'sphinx.ext.mathjax',
+#    'sphinx.ext.ifconfig',
+#    'sphinx.ext.viewcode',
+#    'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -167,10 +167,10 @@ texinfo_documents = [
 # -- Options for Epub output -------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = project
-epub_author = author
-epub_publisher = author
-epub_copyright = copyright
+#epub_title = project
+#epub_author = author
+#epub_publisher = author
+#epub_copyright = copyright
 
 # The unique identifier of the text. This can be a ISBN number
 # or the project homepage.
@@ -182,7 +182,7 @@ epub_copyright = copyright
 # epub_uid = ''
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
+#epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
@@ -190,9 +190,9 @@ epub_exclude_files = ['search.html']
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+#intersphinx_mapping = {'https://docs.python.org/': None}
 
 # -- Options for todo extension ----------------------------------------------
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+todo_include_todos = False
