@@ -10,7 +10,24 @@ except:
 
 
 def degrees2radians(data, force=False):
-    """Converts data from deg to radians"""
+    """Converts data from deg to radians
+    
+    If no data is greater than 20. then nothing is done, unless force was requested
+
+    :Example:
+        .. doctest:: 
+
+            >>> data = nominal_resolution.degrees2radians(data)
+
+    :param data: array to potentially convert from degrees to radians
+    :type data: cdms2.tvariable.TransientVariable
+
+    :param force: force conversion to radian even if no value is greater than 20.
+    :type data: `bool`_
+
+    :return: The same data converted from degrees to radians
+    :rtype: `cdms2.tvariable.TransientVariable`_
+    """
     if data.max() > 20. or force:
         data = data / 180. * numpy.pi
     else:
@@ -19,6 +36,36 @@ def degrees2radians(data, force=False):
 
 
 def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, forceConversion=False, returnMaxDistance=False):
+    """Computes mean nominal resolution
+
+    formula from: https://en.wikipedia.org/wiki/Great-circle_distance
+
+    :Example:
+        .. doctest:: 
+
+            >>> mean = nominal_resolution.mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, forceConversion=False, returnMaxDistance=False)
+
+    :param cellarea: cdms2 variable containing area of each cell
+    :type cellarea: `cdms2.tvariable.TransientVariable`_
+
+    :param latitude_bounds: 2D numpy-like array containing latitudes vertices (ncell, nvertices). If not passed
+                            and cdms2 available will try to obtain from cellarea grid
+    :type latitude_bounds: `numpy.ndarray`_
+
+    :param longitude_bounds: 2D numpy-like array containing longitudes vertices (ncell, nvertices). If not passed
+                            and cdms2 available will try to obtain from cellarea grid
+    :type longitude_bounds: `numpy.ndarray`_
+
+    :param forceConversion: Force convertion of lat/lon from degrees to radians
+    :type forceConversion: `bool`_
+
+    :param returnMaxDistance: Returns and array representing the maximum distance (in km) between vertices for each cell
+    :type returnMaxDistance: `bool`_
+
+    :return: the mean nominal resolution in km and optionally the maximum distance array
+    :rtype: `float [,cdms2.tvariable.TransientVariable]`_
+    """
+
     if longitude_bounds is None and latitude_bounds is None and has_cdms:
         try:  # Ok maybe we can get this info from cellarea data
             mesh = cellarea.getGrid().getMesh()
@@ -59,9 +106,21 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
         return accumulation
 
 def nominal_resolution(mean_resolution):
-
-    # Compute nominal resolution based on: https://docs.google.com/document/d/1h0r8RZr_f3-8egBMMh7aqLwy3snpD6_MrDz1q8n5XUk/edit#bookmark=id.ibeh7ad2gpdi
+    """Compute nominal resolution based on: https://docs.google.com/document/d/1h0r8RZr_f3-8egBMMh7aqLwy3snpD6_MrDz1q8n5XUk/edit#bookmark=id.ibeh7ad2gpdi
     # Link date: Apr 19th, 2018 at 15:43
+
+    :Example:
+        .. doctest:: 
+
+            >>> nom = nominal_resolution.nominal_resolution(mean_resolution)
+
+    :param mean_resolution: The computed mean resolution for the model's grid
+    :type mean_resolution: `float`_
+
+    :return: The nominal resolution
+    :rtype: `str`_
+
+"""
     nominal_resolutions = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 10000.0]
     thresholds = [0.72, 1.6, 3.6, 7.2, 16.0, 36.0, 72.0, 160.0, 360.0, 720.0, 1600.0, 3600.0, 7200.0]
 
@@ -72,8 +131,3 @@ def nominal_resolution(mean_resolution):
             break
 
     return "{:g} km".format(nominal)
-
-
-
-
-

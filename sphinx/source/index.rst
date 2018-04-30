@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Nominal Resolution's documentation!
-==============================================
+Welcome to Nominal Resolution Project's documentation.
+======================================================
+
+Summary
+=======
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
 
-
+  summary
 
 Indices and tables
 ==================
