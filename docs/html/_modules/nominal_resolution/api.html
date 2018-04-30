@@ -1,0 +1,226 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nominal_resolution.api &#8212; Nominal Resolution 0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../../index.html">Nominal Resolution 0.1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for nominal_resolution.api</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">numpy.ma</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cdms2</span>
+    <span class="n">has_cdms</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">has_cdms</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="degrees2radians"><a class="viewcode-back" href="../../API/api.html#nominal_resolution.api.degrees2radians">[docs]</a><span class="k">def</span> <span class="nf">degrees2radians</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts data from deg to radians</span>
+<span class="sd">    </span>
+<span class="sd">    If no data is greater than 20. then nothing is done, unless force was requested</span>
+
+<span class="sd">    :Example:</span>
+<span class="sd">        .. doctest:: </span>
+
+<span class="sd">            &gt;&gt;&gt; data = nominal_resolution.degrees2radians(data)</span>
+
+<span class="sd">    :param data: array to potentially convert from degrees to radians</span>
+<span class="sd">    :type data: cdms2.tvariable.TransientVariable</span>
+
+<span class="sd">    :param force: force conversion to radian even if no value is greater than 20.</span>
+<span class="sd">    :type data: `bool`_</span>
+
+<span class="sd">    :return: The same data converted from degrees to radians</span>
+<span class="sd">    :rtype: `cdms2.tvariable.TransientVariable`_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">20.</span> <span class="ow">or</span> <span class="n">force</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">/</span> <span class="mf">180.</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;It appears your data is already in radians, not touching it&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="mean_resolution"><a class="viewcode-back" href="../../API/api.html#nominal_resolution.api.mean_resolution">[docs]</a><span class="k">def</span> <span class="nf">mean_resolution</span><span class="p">(</span><span class="n">cellarea</span><span class="p">,</span> <span class="n">latitude_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">longitude_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">forceConversion</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">returnMaxDistance</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes mean nominal resolution</span>
+
+<span class="sd">    formula from: https://en.wikipedia.org/wiki/Great-circle_distance</span>
+
+<span class="sd">    :Example:</span>
+<span class="sd">        .. doctest:: mean_resolution</span>
+
+<span class="sd">            &gt;&gt;&gt; mean = nominal_resolution.mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, forceConversion=False, returnMaxDistance=False)</span>
+
+<span class="sd">    :param cellarea: cdms2 variable containing area of each cell</span>
+<span class="sd">    :type cellarea: `cdms2.tvariable.TransientVariable`_</span>
+
+<span class="sd">    :param latitude_bounds: 2D numpy-like array containing latitudes vertices (ncell, nvertices). If not passed</span>
+<span class="sd">                            and cdms2 available will try to obtain from cellarea grid</span>
+<span class="sd">    :type latitude_bounds: `numpy.ndarray`_</span>
+
+<span class="sd">    :param longitude_bounds: 2D numpy-like array containing longitudes vertices (ncell, nvertices). If not passed</span>
+<span class="sd">                            and cdms2 available will try to obtain from cellarea grid</span>
+<span class="sd">    :type longitude_bounds: `numpy.ndarray`_</span>
+
+<span class="sd">    :param forceConversion: Force convertion of lat/lon from degrees to radians</span>
+<span class="sd">    :type forceConversion: `bool`_</span>
+
+<span class="sd">    :param returnMaxDistance: Returns and array representing the maximum distance (in km) between vertices for each cell</span>
+<span class="sd">    :type returnMaxDistance: `bool`_</span>
+
+<span class="sd">    :return: the mean nominal resolution in km and optionally the maximum distance array</span>
+<span class="sd">    :rtype: `float [,cdms2.tvariable.TransientVariable]`_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">longitude_bounds</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">latitude_bounds</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">has_cdms</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># Ok maybe we can get this info from cellarea data</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="n">cellarea</span><span class="o">.</span><span class="n">getGrid</span><span class="p">()</span><span class="o">.</span><span class="n">getMesh</span><span class="p">()</span>
+            <span class="n">latitude_bounds</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">longitude_bounds</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;You did not pass lat/lon bounds but we could infer them from cellarea&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">longitude_bounds</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">latitude_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;You did not pass lat/lon bounds and couldn&#39;t infer them from cellarea&quot;</span><span class="p">)</span>
+
+
+    <span class="n">latitude_bounds</span> <span class="o">=</span> <span class="n">degrees2radians</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="p">,</span> <span class="n">forceConversion</span><span class="p">)</span>
+    <span class="n">longitude_bounds</span> <span class="o">=</span> <span class="n">degrees2radians</span><span class="p">(</span><span class="n">longitude_bounds</span><span class="p">,</span> <span class="n">forceConversion</span><span class="p">)</span>
+
+    <span class="c1"># distance between successive corners</span>
+    <span class="n">nverts</span> <span class="o">=</span> <span class="n">latitude_bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">del_lats</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sh</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">del_lons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sh</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">max_distance</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sh</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nverts</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nverts</span><span class="p">):</span>
+            <span class="n">del_lats</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">latitude_bounds</span><span class="p">[:,</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">del_lons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">longitude_bounds</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">longitude_bounds</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="p">)</span>
+            <span class="n">del_lons</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">greater</span><span class="p">(</span><span class="n">del_lons</span><span class="p">,</span><span class="mf">180.</span><span class="p">),</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">del_lons</span><span class="o">-</span><span class="mf">360.</span><span class="p">),</span> <span class="n">del_lons</span><span class="p">)</span>
+            <span class="c1"># formula from: https://en.wikipedia.org/wiki/Great-circle_distance</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">del_lats</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude_bounds</span><span class="p">[:,</span><span class="n">j</span><span class="p">])</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">del_lons</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">max_distance</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">max_distance</span><span class="p">,</span> <span class="n">distance</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+
+    <span class="n">radius</span> <span class="o">=</span> <span class="mf">6371.</span>  <span class="c1"># in km</span>
+    <span class="n">accumulation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cellarea</span><span class="o">*</span><span class="n">max_distance</span><span class="p">)</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cellarea</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">returnMaxDistance</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">accumulation</span><span class="p">,</span> <span class="n">max_distance</span><span class="o">*</span><span class="n">radius</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">accumulation</span></div>
+
+<div class="viewcode-block" id="nominal_resolution"><a class="viewcode-back" href="../../API/api.html#nominal_resolution.api.nominal_resolution">[docs]</a><span class="k">def</span> <span class="nf">nominal_resolution</span><span class="p">(</span><span class="n">mean_resolution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute nominal resolution based on: https://docs.google.com/document/d/1h0r8RZr_f3-8egBMMh7aqLwy3snpD6_MrDz1q8n5XUk/edit#bookmark=id.ibeh7ad2gpdi</span>
+<span class="sd">    # Link date: Apr 19th, 2018 at 15:43</span>
+
+<span class="sd">    :Example:</span>
+<span class="sd">        .. doctest:: api_nominal_resolution</span>
+
+<span class="sd">            &gt;&gt;&gt; nom = nominal_resolution.nominal_resolution(mean_resolution)</span>
+
+<span class="sd">    :param mean_resolution: The computed mean resolution for the model&#39;s grid</span>
+<span class="sd">    :type mean_resolution: `float`_</span>
+
+<span class="sd">    :return: The nominal resolution</span>
+<span class="sd">    :rtype: `str`_</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+    <span class="n">nominal_resolutions</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">250.0</span><span class="p">,</span> <span class="mf">500.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">2500.0</span><span class="p">,</span> <span class="mf">5000.0</span><span class="p">,</span> <span class="mf">10000.0</span><span class="p">]</span>
+    <span class="n">thresholds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.72</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">,</span> <span class="mf">16.0</span><span class="p">,</span> <span class="mf">36.0</span><span class="p">,</span> <span class="mf">72.0</span><span class="p">,</span> <span class="mf">160.0</span><span class="p">,</span> <span class="mf">360.0</span><span class="p">,</span> <span class="mf">720.0</span><span class="p">,</span> <span class="mf">1600.0</span><span class="p">,</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="mf">7200.0</span><span class="p">]</span>
+
+    <span class="n">nominal</span> <span class="o">=</span> <span class="n">nominal_resolutions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">thresholds</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mean_resolution</span> <span class="o">&lt;</span> <span class="n">res</span><span class="p">:</span>
+            <span class="n">nominal</span> <span class="o">=</span> <span class="n">nominal_resolutions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{:g}</span><span class="s2"> km&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nominal</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../summary.html">Find out more about this package</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Charles Doutriaux and K.E. Taylor.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
