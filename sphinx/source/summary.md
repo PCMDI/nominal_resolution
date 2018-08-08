@@ -8,4 +8,4 @@ characterizes the resolution of the grid used to report model output fields,
 which may differ from the native grid on which the fields are calculated by the
 model.
 
-
+Karl Taylor to add text here
