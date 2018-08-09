@@ -1,4 +1,4 @@
-# Usage Documentation
+# nominal_resolution Usage Documentation
 
 The purpose of the nominal_resolution python code is to calculate the "nominal resolution" of a horizontal grid.  For CMIP6 the nominal resolution must be calculated the same way for all models.  In the ESGF data archive of CMIP6 results, nominal resolution is one of the search criteria that can be useful in identifying datasets of interest.   
 
@@ -17,9 +17,9 @@ For the most common use case, a user must call the function `nominal_resolution.
 
 where `ncells` is the number of grid cells and `nverts` is the maximum number of vertices a grid cell might have.
 
-Any sensible unit can be used in defining the cell areas (`cellarea`), including non-dimensional angular area measures.  The longitudes and latitudes should be expressed either in radians or in degrees.  For any grid cells with fewer than nverts vertices, the unneeded vertice `longitudes_bounds` and `latitudes_bounds` should either 
-* duplicate one of the cell's valid vertex locations
-* or be defined as numpy masked arrays with unneeded vertices masked
+Any sensible unit can be used in defining the cell areas (`cellarea`), including non-dimensional angular area measures.  The longitudes and latitudes should be expressed either in radians or in degrees.  For any grid cells with fewer than `nverts` vertices, the `longitudes_bounds` and `latitudes_bounds`, corresponding to the cell's **unneeded** vertices, should either 
+* duplicate the coordinates for one of the cell's valid vertices
+* or be defined as numpy masked arrays with the unneeded vertices masked
 
 Depending on the units, the `latitude_bounds` values should be in the range:
 * for radians: -pi to pi 
