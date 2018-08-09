@@ -12,7 +12,8 @@ except:
 def degrees2radians(data, force=False):
     """Converts data from deg to radians
     
-    If no data is greater than 20. then nothing is done, unless force was requested
+    If no data is outside the range -16 to 16, assume data is already in radians and 
+                                               do nothing unless force was requested
 
     :Example:
         .. doctest:: 
@@ -22,16 +23,16 @@ def degrees2radians(data, force=False):
     :param data: array to potentially convert from degrees to radians
     :type data: cdms2.tvariable.TransientVariable
 
-    :param force: force conversion to radian even if no value is greater than 20.
+    :param force: force conversion to radian even if no value is greater than 16.
     :type data: `bool`_
 
     :return: The same data converted from degrees to radians
     :rtype: `cdms2.tvariable.TransientVariable`_
     """
-    if data.max() > 20. or force:
+    if numpy.ma.absolute(data).max() > 16. or force:
         data = data / 180. * numpy.pi
     else:
-        warnings.warn("It appears your data is already in radians, not touching it")
+        warnings.warn("It appears your data is already in radians, so nothing done by function degrees2radians")
     return data
 
 
@@ -49,17 +50,17 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
     :type cellarea: `cdms2.tvariable.TransientVariable`_
 
     :param latitude_bounds: 2D numpy-like array containing latitudes vertices (ncell, nvertices). If not passed
-                            and cdms2 available will try to obtain from cellarea grid
+                            and cdms2 is available, will try to obtain from cellarea grid
     :type latitude_bounds: `numpy.ndarray`_
 
     :param longitude_bounds: 2D numpy-like array containing longitudes vertices (ncell, nvertices). If not passed
-                            and cdms2 available will try to obtain from cellarea grid
+                            and cdms2 is available, will try to obtain from cellarea grid
     :type longitude_bounds: `numpy.ndarray`_
 
-    :param forceConversion: Force convertion of lat/lon from degrees to radians
+    :param forceConversion: Force conversion of lat/lon from degrees to radians
     :type forceConversion: `bool`_
 
-    :param returnMaxDistance: Returns and array representing the maximum distance (in km) between vertices for each cell
+    :param returnMaxDistance: Returns an array representing the maximum distance (in km) between vertices for each cell
     :type returnMaxDistance: `bool`_
 
     :return: the mean nominal resolution in km and optionally the maximum distance array
@@ -71,7 +72,7 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
             mesh = cellarea.getGrid().getMesh()
             latitude_bounds = mesh[:,0]
             longitude_bounds = mesh[:,1]
-            warnings.warn("You did not pass lat/lon bounds but we could infer them from cellarea")
+            warnings.warn("You did not pass lat/lon bounds but we inferred them from cellarea")
         except:
             pass
 
@@ -93,7 +94,7 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
         for j in range(i+1, nverts):
             del_lats = numpy.ma.absolute(latitude_bounds[:,i] - latitude_bounds[:,j])
             del_lons = numpy.ma.absolute(longitude_bounds[:,i] - longitude_bounds[:,j] )
-            del_lons = numpy.ma.where(numpy.ma.greater(del_lons,180.),numpy.ma.absolute(del_lons-360.), del_lons)
+            del_lons = numpy.ma.where(numpy.ma.greater(del_lons,numpy.pi),numpy.ma.absolute(del_lons-2.*numpy.pi), del_lons)
             # formula from: https://en.wikipedia.org/wiki/Great-circle_distance
             distance = 2.* numpy.ma.arcsin(numpy.ma.sqrt(numpy.ma.sin(del_lats/2.)**2 + numpy.ma.cos(latitude_bounds[:,i])*numpy.ma.cos(latitude_bounds[:,j])*numpy.ma.sin(del_lons/2.)**2))
             max_distance = numpy.ma.maximum(max_distance, distance.filled(0.0))
