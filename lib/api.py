@@ -46,7 +46,7 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
 
             >>> mean = nominal_resolution.mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, forceConversion=False, returnMaxDistance=False)
 
-    :param cellarea: cdms2 variable containing area of each cell
+    :param cellarea: simple array, python masked array, or cdms2 variable containing area of each cell
     :type cellarea: `cdms2.tvariable.TransientVariable`_
 
     :param latitude_bounds: 2D numpy-like array containing latitudes vertices (ncell, nvertices). If not passed
