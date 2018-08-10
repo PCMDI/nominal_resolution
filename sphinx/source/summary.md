@@ -31,6 +31,8 @@ Depending on the units, the `longitude_bounds` values should:
 
 The `mean_resolution` is returned by the above function, and, optionally, by setting the function parameter `returnMaxDistance` to `True`, the function will also return an array containing the maximum dimension of each of the grid cells. This array of values could subsequently be used to more fully characterize the distribution of grid cell sizes (allowing the user, for example, to compute a standard deviation). 
 
+If there are grid cells that should be omitted from the calculation, then `cellarea` should be defined as a python masked array (and all omitted cells should be masked). 
+
 The second step is to obtain `nominal_resolution` by passing `mean_resolution` to the `nominal_resolution` function.
 
 The above functions can be found at: https://github.com/PCMDI/nominal_resolution/blob/master/lib/api.py
