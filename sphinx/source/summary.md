@@ -19,9 +19,7 @@ For the most common use case, the first step is to call the function `mean_resol
 
 where `ncells` is the number of grid cells and `nverts` is the maximum number of vertices a grid cell might have.
 
-Any sensible unit can be used in defining the cell areas (`cellarea`), including non-dimensional angular area measures.  The longitudes and latitudes should be expressed either in radians or in degrees.  For any grid cells with fewer than `nverts` vertices, the `longitudes_bounds` and `latitudes_bounds` for the cell's **unneeded** vertices should either 
-* duplicate the coordinates for one of the cell's valid vertices
-* or be defined as numpy masked arrays with the unneeded vertices masked
+Any sensible unit can be used in defining the cell areas (`cellarea`), including non-dimensional angular area measures.  The longitudes and latitudes should be expressed either in radians or in degrees.  If a grid includes some cells with fewer than `nverts` vertices, the `longitudes_bounds` and `latitudes_bounds` arrays should be defined as numpy masked arrays and any **unneeded** vertices should be masked.
 
 Depending on the units, the `latitude_bounds` values should be in the range:
 * for radians: -pi to pi 
