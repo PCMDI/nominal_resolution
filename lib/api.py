@@ -9,11 +9,11 @@ except:
     has_cdms = False
 
 
-def degrees2radians(data, force=False):
+def degrees2radians(data, radianLimit):
     """Converts data from deg to radians
     
-    If no data is outside the range -16 to 16, assume data is already in radians and 
-                                               do nothing unless force was requested
+    If no data is outside the range -radianLimit to + radianLimit, assume data is 
+                     already in radians and do nothing
 
     :Example:
         .. doctest:: 
@@ -22,15 +22,15 @@ def degrees2radians(data, force=False):
 
     :param data: array to potentially convert from degrees to radians
     :type data: cdms2.tvariable.TransientVariable
-
-    :param force: force conversion to radian even if no value is greater than 16.
-    :type data: `bool`_
+    
+    :param radianLimit: If the magnitude of any data value exceeds radianLimit, convert data from deg to rad. 
+    :type radianLimit: scalar
 
     :return: The same data converted from degrees to radians
     :rtype: `cdms2.tvariable.TransientVariable`_
     """
-    if numpy.ma.absolute(data).max() > 16. or force:
-        data = data / 180. * numpy.pi
+    if numpy.ma.absolute(data).max() > radianLimit:
+        data = (data / 180.) * numpy.pi
     else:
         warnings.warn("It appears your data is already in radians, so nothing done by function degrees2radians")
     return data
@@ -79,9 +79,19 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
     if longitude_bounds is None or latitude_bounds is None:
         raise RuntimeError("You did not pass lat/lon bounds and couldn't infer them from cellarea")
 
-
-    latitude_bounds = degrees2radians(latitude_bounds, forceConversion)
-    longitude_bounds = degrees2radians(longitude_bounds, forceConversion)
+    if forceConversion:
+        radianLimit = 0.
+    else:
+        radianLimit = 4.
+        
+    latitude_bounds = degrees2radians(latitude_bounds, radianLimit)
+    
+    if forceConversion:
+        radianLimit = 0.
+    else:
+        radianLimit = 10.
+    
+    longitude_bounds = degrees2radians(longitude_bounds, radianLimit)
 
     # distance between successive corners
     nverts = latitude_bounds.shape[-1]
