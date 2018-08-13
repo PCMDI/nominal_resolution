@@ -43,7 +43,8 @@ class KarlTest(unittest.TestCase):
 
         print("Correct: {:g}".format(correct_resolution))
 
-        test_resolution = nominal_resolution.mean_resolution(cellarea, blats, blons)
+        convertdeg2rad = True
+        test_resolution = nominal_resolution.mean_resolution(cellarea, blats, blons, convertdeg2rad)
 
         print("Test resol: {:g}".format(test_resolution))
 
