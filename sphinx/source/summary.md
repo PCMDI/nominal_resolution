@@ -23,11 +23,11 @@ Any sensible unit can be used in defining the cell areas (`cellarea`), including
 
 Depending on the units, the `latitude_bounds` values should be in the range:
 * for radians: -pi to pi 
-* for degrees: -90. to 90.  If across the entire grid, no latitude is outside the range -4. to 4., then in calling the function `mean_resolution`, you must set parameter `forceConversion` to `True`.
+* for degrees: -90. to 90.  If across the entire grid, no latitude is outside the range -4. to 4. degrees, then in calling the function `mean_resolution`, you must set parameter `forceConversion` to `True`.
 
 Depending on the units, the `longitude_bounds` values should:
 * for radians: span a range no more than 3 pi with the additional restriction that no value should be outside the range -3 pi to 3 pi. 
-* for degrees: span a range no more than 540 degrees. If across the entire grid, no longitude is outside the range -10. to 10., then in calling the function `mean_resolution`, you must set parameter `forceConversion` to `True`.
+* for degrees: span a range no more than 540 degrees. If across the entire grid, no longitude is outside the range -10. to 10. degrees, then in calling the function `mean_resolution`, you must set parameter `forceConversion` to `True`.
 
 The `mean_resolution` is returned by the above function, and, optionally, by setting the function parameter `returnMaxDistance` to `True`, the function will also return an array containing the maximum dimension of each of the grid cells. This array of values could subsequently be used to more fully characterize the distribution of grid cell sizes (allowing the user, for example, to compute a standard deviation). 
 
