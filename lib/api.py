@@ -36,7 +36,7 @@ def degrees2radians(data, radianLimit):
     return data
 
 
-def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, forceConversion=False, returnMaxDistance=False):
+def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, convertdeg2rad, returnMaxDistance=False):
     """Computes mean nominal resolution
 
     formula from: https://en.wikipedia.org/wiki/Great-circle_distance
@@ -57,8 +57,8 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
                             and cdms2 is available, will try to obtain from cellarea grid
     :type longitude_bounds: `numpy.ndarray`_
 
-    :param forceConversion: Force conversion of lat/lon from degrees to radians
-    :type forceConversion: `bool`_
+    :param convertdeg2rad: set to True if lat/lon in degrees; set to false if in radians
+    :type convertdeg2rad: `bool`_
 
     :param returnMaxDistance: Returns an array representing the maximum distance (in km) between vertices for each cell
     :type returnMaxDistance: `bool`_
@@ -79,19 +79,10 @@ def mean_resolution(cellarea, latitude_bounds=None, longitude_bounds=None, force
     if longitude_bounds is None or latitude_bounds is None:
         raise RuntimeError("You did not pass lat/lon bounds and couldn't infer them from cellarea")
 
-    if forceConversion:
-        radianLimit = 0.
-    else:
-        radianLimit = 4.
-        
-    latitude_bounds = degrees2radians(latitude_bounds, radianLimit)
-    
-    if forceConversion:
-        radianLimit = 0.
-    else:
-        radianLimit = 10.
-    
-    longitude_bounds = degrees2radians(longitude_bounds, radianLimit)
+    if convertdeg2rad:
+        radianLimit = 0.        
+        latitude_bounds = degrees2radians(latitude_bounds, radianLimit)
+        longitude_bounds = degrees2radians(longitude_bounds, radianLimit)
 
     # distance between successive corners
     nverts = latitude_bounds.shape[-1]
