@@ -29,9 +29,9 @@ Depending on the units, the `longitude_bounds` values should:
 * for radians: span a range no more than 3 pi. 
 * for degrees: span a range no more than 540 degrees.
 
-The user must also set the parameter `convertdeg2rad. If the units of longitudes and latitudes are:
-* degrees: set `convertdeg2rad` to `True`
-* radians: set `convertdeg2rad` to `False` 
+The user must also set the parameter `convertdeg2rad, depending on the units of longitudes and latitudes:
+* if units are degrees, set `convertdeg2rad` to `True`
+* if units are radians, set `convertdeg2rad` to `False` 
 
 The `mean_resolution` is returned by the above function, and, optionally, by setting the function parameter `returnMaxDistance` to `True`, the function will also return an array containing the maximum dimension of each of the grid cells. This array of values could subsequently be used to more fully characterize the distribution of grid cell sizes (allowing the user, for example, to compute a standard deviation). 
 
