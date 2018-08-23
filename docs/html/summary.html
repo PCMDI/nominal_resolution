@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Abstract &#8212; Nominal Resolution 0.1 documentation</title>
+    <title>nominal_resolution Usage Documentation &#8212; Nominal Resolution 0.1 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -25,8 +25,6 @@
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="index.html" title="Welcome to Nominal Resolution Project’s documentation."
              accesskey="P">previous</a> |
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a>
         </div>
@@ -41,15 +39,44 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="abstract">
-<span id="abstract"></span><h1>Abstract<a class="headerlink" href="#abstract" title="Permalink to this headline">¶</a></h1>
-<p>There are various ways grid resolution might be defined, but in CMIP6 this
-should be done in the same way by all models.  If the following procedure seems
-inappropriate for a model, the modeling group may request an exception from the
-WGCM Infrastructure Panel (WIP).  In general, the nominal resolution
-characterizes the resolution of the grid used to report model output fields,
-which may differ from the native grid on which the fields are calculated by the
-model.</p>
+  <div class="section" id="nominal-resolution-usage-documentation">
+<span id="nominal-resolution-usage-documentation"></span><h1>nominal_resolution Usage Documentation<a class="headerlink" href="#nominal-resolution-usage-documentation" title="Permalink to this headline">¶</a></h1>
+<p>The purpose of the nominal_resolution python code is to calculate the “nominal resolution” of a horizontal grid.  For CMIP6 the nominal resolution must be calculated the same way for all models.  In the ESGF data archive of CMIP6 results, nominal resolution is one of the search criteria that can be useful in identifying datasets of interest.</p>
+<p>The algorithm for defining nominal resolution is given in <a class="reference external" href="https://docs.google.com/document/d/1h0r8RZr_f3-8egBMMh7aqLwy3snpD6_MrDz1q8n5XUk/edit#bookmark=id.ibeh7ad2gpdi">Appendix 2</a> of a data specifications document for CMIP6.  For regular cartesian latitude by longitude global grids, it can be calculated (to a good approximation) using a formula given in <a class="reference external" href="https://docs.google.com/document/d/1h0r8RZr_f3-8egBMMh7aqLwy3snpD6_MrDz1q8n5XUk/edit#bookmark=id.ibeh7ad2gpdi">Appendix 2</a>, but for irregular grids, sub-global domains, and the like, it must be calculated with the python code available here (or its equivalent).</p>
+<p>Note that the nominal resolution is defined for two different purposes:</p>
+<ul class="simple">
+<li>in each CMIP6-archived model output file, a global attribute named <code class="docutils literal notranslate"><span class="pre">nominal_resolution</span></code> is stored, which records the resolution of the <strong><em>grid on which data are reported</em></strong></li>
+<li>in the <a class="reference external" href="https://github.com/WCRP-CMIP/CMIP6_CVs/blob/master/CMIP6_source_id.json">CMIP6_source_id.json file</a> the <code class="docutils literal notranslate"><span class="pre">native_nominal_resolution</span></code> is stored, which records the resolution of the <strong><em>native grid</em></strong> of each model.</li>
+</ul>
+<p>There are two steps in calculating the nominal resolution (for allowed values, see <a class="reference external" href="https://github.com/WCRP-CMIP/CMIP6_CVs/blob/master/CMIP6_nominal_resolution.json">CMIP6_nominal_resolution.json</a>): first, the mean resolution is calculated using the <code class="docutils literal notranslate"><span class="pre">mean_resolution</span></code> function, and then that is passed to the <code class="docutils literal notranslate"><span class="pre">nominal_resolution</span></code> function, which returns <code class="docutils literal notranslate"><span class="pre">nominal_resolution</span></code>.</p>
+<p>For the most common use case, the first step is to call the function <code class="docutils literal notranslate"><span class="pre">mean_resolution</span></code>, passing it an array (<code class="docutils literal notranslate"><span class="pre">cellarea</span></code>) containing grid-cell areas and arrays (<code class="docutils literal notranslate"><span class="pre">latitude_bounds</span></code> and <code class="docutils literal notranslate"><span class="pre">longitude_bounds</span></code>) containing the longitude and latitude coordinates of the vertices of each grid cell.  The input arrays can either be simple arrays or numpy masked arrays dimensioned as follow:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>     <span class="n">cellarea</span><span class="p">[</span><span class="n">ncells</span><span class="p">]</span>
+     <span class="n">latitude_bounds</span><span class="p">[</span><span class="n">ncells</span><span class="p">,</span><span class="n">nverts</span><span class="p">]</span>
+     <span class="n">longitude_bounds</span><span class="p">[</span><span class="n">ncells</span><span class="p">,</span><span class="n">nverts</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">ncells</span></code> is the number of grid cells and <code class="docutils literal notranslate"><span class="pre">nverts</span></code> is the maximum number of vertices a grid cell might have.</p>
+<p>Any sensible unit can be used in defining the cell areas (<code class="docutils literal notranslate"><span class="pre">cellarea</span></code>), including non-dimensional angular area measures.  The longitudes and latitudes should be expressed either in radians or in degrees.  If a grid includes some cells with fewer than <code class="docutils literal notranslate"><span class="pre">nverts</span></code> vertices, the <code class="docutils literal notranslate"><span class="pre">longitudes_bounds</span></code> and <code class="docutils literal notranslate"><span class="pre">latitudes_bounds</span></code> arrays should be defined as numpy masked arrays and any <strong>unneeded</strong> vertices should be masked.</p>
+<p>Depending on the units, the <code class="docutils literal notranslate"><span class="pre">latitude_bounds</span></code> values should be in the range:</p>
+<ul class="simple">
+<li>for radians: -pi to pi</li>
+<li>for degrees: -90. to 90.</li>
+</ul>
+<p>Depending on the units, the <code class="docutils literal notranslate"><span class="pre">longitude_bounds</span></code> values should:</p>
+<ul class="simple">
+<li>for radians: span a range no more than 3 pi.</li>
+<li>for degrees: span a range no more than 540 degrees.</li>
+</ul>
+<p>The user must also set the parameter `convertdeg2rad, depending on the units of longitudes and latitudes:</p>
+<ul class="simple">
+<li>if units are degrees, set <code class="docutils literal notranslate"><span class="pre">convertdeg2rad</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code></li>
+<li>if units are radians, set <code class="docutils literal notranslate"><span class="pre">convertdeg2rad</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">mean_resolution</span></code> is returned by the above function, and, optionally, by setting the function parameter <code class="docutils literal notranslate"><span class="pre">returnMaxDistance</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the function will also return an array containing the maximum dimension of each of the grid cells. This array of values could subsequently be used to more fully characterize the distribution of grid cell sizes (allowing the user, for example, to compute a standard deviation).</p>
+<p>If there are grid cells that should be omitted from the calculation, then <code class="docutils literal notranslate"><span class="pre">cellarea</span></code> should be defined as a python masked array (and all omitted cells should be masked).</p>
+<p>The second step is to obtain <code class="docutils literal notranslate"><span class="pre">nominal_resolution</span></code> by passing <code class="docutils literal notranslate"><span class="pre">mean_resolution</span></code> to the <code class="docutils literal notranslate"><span class="pre">nominal_resolution</span></code> function.</p>
+<p>The above functions can be found at: https://github.com/PCMDI/nominal_resolution/blob/master/lib/api.py</p>
+<p>Sample codes using nominal_resolution are available at: https://github.com/PCMDI/nominal_resolution/tree/master/tests</p>
 </div>
 
 
@@ -60,7 +87,7 @@ model.</p>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
           <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Abstract</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">nominal_resolution Usage Documentation</a></li>
 </ul>
 
           <div role="search">
@@ -83,8 +110,6 @@ model.</p>
           <div role="navigation" aria-label="related navigaton">
             <a href="index.html" title="Welcome to Nominal Resolution Project’s documentation."
               >previous</a> |
-            <a href="py-modindex.html" title="Python Module Index"
-              >modules</a> |
             <a href="genindex.html" title="General Index"
               >index</a>
           </div>
@@ -99,7 +124,7 @@ model.</p>
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Charles Doutriaux and K.E. Taylor.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.
     </div>
         </div>
         <div class="clearer"></div>
