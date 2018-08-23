@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, division
 import unittest
 import numpy
 import nominal_resolution
@@ -18,24 +18,28 @@ class KarlTest(unittest.TestCase):
         radius = 6371.
         # Horrible way but don't want to think about it
         # just copying Karl's Fortran like pseudo code
-        for ilat in range(nlat):
-            for ilon in range(nlon):
-                n = ilon + ilat*nlon
-                for i in range(2):
-                    blons[n,i] = ilon + dlon/2.
-                    blats[n,i] = -90.+(ilat+i)*dlat
-                    blons[n,i+3] = ilon - dlon/2.
-                    blats[n,i+3] = -90. + (ilat-i+1)*dlat
-                blons[:,2] = numpy.ma.masked
-                blats[:,2] = numpy.ma.masked
-                if ilon == nlon-1:
-                    cellarea[n] = numpy.ma.masked
-                else:
-                    cellarea[n] = radius**2 * (blons[n,0]-blons[n,3])*numpy.pi/180. * (numpy.sin(numpy.pi*blats[n,3]/180.) - numpy.sin(numpy.pi*blats[n,0]/180.))
+        blons2 = numpy.ma.zeros((nlon*nlat, 5))
+        blats2 = numpy.ma.zeros((nlon*nlat, 5))
+        rg = range(nlon*nlat)
+        blons2[:,0] = [n%nlon + dlon/2. for n in rg]
+        blons2[:,1] = blons2[:,0]
+        blons2[:,2] = numpy.ma.masked
+        blons2[:,3] = [n%nlon - dlon/2. for n in rg]
+        blons2[:,4] = blons2[:,3]
 
-        return cellarea, blats, blons, dlon, dlat
+        blats2[:,0] = [-90. + (n//nlon)*dlat for n in rg]
+        blats2[:,1] = [-90. + (n//nlon+1)*dlat for n in rg]
+        blats2[:,2] = numpy.ma.masked
+        blats2[:,3] = [-90. + (n//nlon+1)*dlat for n in rg]
+        blats2[:,4] = blats2[:,0]
 
-    def doit(self, nlon, nlat):
+        cellarea2 = radius**2 * (blons2[:,0]-blons2[:,3])*numpy.pi/180. * (numpy.sin(numpy.pi*blats2[:,3]/180.) - numpy.sin(numpy.pi*blats2[:,0]/180.))
+        for i in numpy.arange(1,nlat+1)*nlon-1:
+            cellarea2[i] = numpy.ma.masked
+
+        return cellarea2, blats2, blons2, dlon, dlat
+
+    def doit(self, nlon, nlat, resolution):
         print("Testing:",nlon, nlat)
         radius = 6371.
         cellarea, blats, blons, dlon, dlat = self.generateGrid(nlon, nlat)
@@ -48,25 +52,32 @@ class KarlTest(unittest.TestCase):
 
         print("Test resol: {:g}".format(test_resolution))
 
-        print("rtol:",(test_resolution-correct_resolution)/correct_resolution)
-        rtol = 0.001
+        print("tol:",(test_resolution-correct_resolution)/correct_resolution)
+
         if nlon<5:
             rtol = .05
-        elif nlon<20:
+        elif nlon<25:
             rtol = .02
+        else:
+            rtol = 0.001
+        print("rtol is:",rtol)
         self.assertTrue(numpy.allclose(correct_resolution,test_resolution,rtol))
-        #self.assertEqual(nominal_resolution.nominal_resolution(test_resolution),"250 km")
+        self.assertEqual(nominal_resolution.nominal_resolution(test_resolution),resolution)
 
 
     def testMultipleResolutions(self):
-        self.doit(3,4)
-        self.doit(4,3)
-        self.doit(10,9)
-        self.doit(360,180)
-        self.doit(18,90)
-        self.doit(180,10)
-        self.doit(180,90)
-        self.doit(1800,900)
+        self.doit(3,4,"10000 km")
+        self.doit(4,3,"10000 km")
+        self.doit(10,9,"5000 km")
+        self.doit(18,90,"2500 km")
+        self.doit(180,10,"2500 km")
+        self.doit(24,30,"1000 km")
+        self.doit(80,40,"500 km")
+        self.doit(180,90,"250 km")
+        self.doit(360,180,"100 km")
+        self.doit(900,500,"50 km")
+        self.doit(1800,900,"25 km")
+        self.doit(3600,1800,"10 km")
 
 
 
