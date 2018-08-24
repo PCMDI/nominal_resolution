@@ -45,6 +45,7 @@ release = u'0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'autoapi.extension',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
@@ -55,7 +56,9 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
 ]
-
+# Document Python Code
+autoapi_type = 'python'
+autoapi_dirs = ['../../lib']
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

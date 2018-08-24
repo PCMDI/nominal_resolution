@@ -1,5 +1,0 @@
-A
----
-
-.. automodule:: nominal_resolution.api
-    :members:
