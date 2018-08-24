@@ -1,0 +1,211 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>lib.api &#8212; Nominal Resolution 0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/autoapi.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../../../index.html">Nominal Resolution 0.1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-lib.api">
+<span id="lib-api"></span><h1><a class="reference internal" href="#module-lib.api" title="lib.api"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lib.api</span></code></a><a class="headerlink" href="#module-lib.api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="lib.api.has_cdms">
+<code class="descclassname">lib.api.</code><code class="descname">has_cdms</code><em class="property"> = True</em><a class="headerlink" href="#lib.api.has_cdms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="lib.api.degrees2radians">
+<code class="descclassname">lib.api.</code><code class="descname">degrees2radians</code><span class="sig-paren">(</span><em>data</em>, <em>radianLimit</em><span class="sig-paren">)</span><a class="headerlink" href="#lib.api.degrees2radians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts data from deg to radians</p>
+<p>If no data is outside the range -radianLimit to + radianLimit, assume data
+is already in radians and do nothing</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">nominal_resolution</span><span class="o">.</span><span class="n">degrees2radians</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>cdms2.tvariable.TransientVariable</em>) – array to potentially convert from degrees to radians</li>
+<li><strong>radianLimit</strong> (<a href="#id1"><span class="problematic" id="id2">`float`_</span></a>) – If the magnitude of any data value exceeds radianLimit,
+convert data from deg to rad.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The same data converted from degrees to radians</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a href="#id3"><span class="problematic" id="id4">`cdms2.tvariable.TransientVariable`_</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="lib.api.mean_resolution">
+<code class="descclassname">lib.api.</code><code class="descname">mean_resolution</code><span class="sig-paren">(</span><em>cellarea</em>, <em>latitude_bounds</em>, <em>longitude_bounds</em>, <em>convertdeg2rad</em>, <em>returnMaxDistance=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lib.api.mean_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes mean nominal resolution</p>
+<p>formula from: <a class="reference external" href="https://en.wikipedia.org/wiki/Great-circle_distance">https://en.wikipedia.org/wiki/Great-circle_distance</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mean</span> <span class="o">=</span> <span class="n">nominal_resolution</span><span class="o">.</span><span class="n">mean_resolution</span><span class="p">(</span><span class="n">cellarea</span><span class="p">,</span> <span class="n">latitude_bounds</span><span class="p">,</span> <span class="n">longitude_bounds</span><span class="p">,</span>
+<span class="go">                                              convertdeg2rad, returnMaxDistance=False)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cellarea</strong> (<a href="#id5"><span class="problematic" id="id6">`cdms2.tvariable.TransientVariable`_</span></a>) – simple array, python masked array, or cdms2 variable containing area of each cell</li>
+<li><strong>latitude_bounds</strong> (<a href="#id7"><span class="problematic" id="id8">`numpy.ndarray`_</span></a>) – 2D numpy-like array containing latitudes vertices (ncell, nvertices). If None is passed
+and cdms2 is available, will try to obtain from cellarea grid</li>
+<li><strong>longitude_bounds</strong> (<a href="#id9"><span class="problematic" id="id10">`numpy.ndarray`_</span></a>) – 2D numpy-like array containing longitudes vertices (ncell, nvertices). If None is passed
+and cdms2 is available, will try to obtain from cellarea grid</li>
+<li><strong>convertdeg2rad</strong> (<a href="#id11"><span class="problematic" id="id12">`bool`_</span></a>) – set to True if lat/lon in degrees; set to false if in radians</li>
+<li><strong>returnMaxDistance</strong> (<a href="#id13"><span class="problematic" id="id14">`bool`_</span></a>) – Returns an array representing the maximum distance (in km) between vertices for each cell</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the mean nominal resolution in km and optionally the maximum distance array</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a href="#id15"><span class="problematic" id="id16">`float [,cdms2.tvariable.TransientVariable]`_</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="lib.api.nominal_resolution">
+<code class="descclassname">lib.api.</code><code class="descname">nominal_resolution</code><span class="sig-paren">(</span><em>mean_resolution</em><span class="sig-paren">)</span><a class="headerlink" href="#lib.api.nominal_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute nominal resolution based on:
+<a class="reference external" href="https://docs.google.com/document/d/1h0r8RZr_f3-8egBMMh7aqLwy3snpD6_MrDz1q8n5XUk/edit#bookmark=id.ibeh7ad2gpdi">https://docs.google.com/document/d/1h0r8RZr_f3-8egBMMh7aqLwy3snpD6_MrDz1q8n5XUk/edit#bookmark=id.ibeh7ad2gpdi</a></p>
+<blockquote>
+<div><p># Link date: Apr 19th, 2018 at 15:43</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nom</span> <span class="o">=</span> <span class="n">nominal_resolution</span><span class="o">.</span><span class="n">nominal_resolution</span><span class="p">(</span><span class="n">mean_resolution</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param mean_resolution:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">The computed mean resolution for the model’s grid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">type mean_resolution:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first"><a href="#id17"><span class="problematic" id="id18">`float`_</span></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"><p class="first">The nominal resolution</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body"><p class="first last"><a href="#id19"><span class="problematic" id="id20">`str`_</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../summary.html">nominal_resolution Usage Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Sphinx AutoAPI Index</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../../../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../../../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="../../../_sources/autoapi/lib/api/index.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Charles Doutriaux and K.E. Taylor.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
