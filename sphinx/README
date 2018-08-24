@@ -1,0 +1,4 @@
+conda install c conda-forge sphinx sphinx-autoapi recommonmark
+make html
+# generates doc at: https://pcmdi.github.io/nominal_resolution/html/index.html
+~                                                     
