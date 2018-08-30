@@ -15,6 +15,7 @@ requirements:
     - setuptools
   run:
     - python
+    - numpy
 
 about:
     home:  http://github.com/pcmdi/nominal_resolution
